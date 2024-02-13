@@ -1,0 +1,36 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- dependabot/maven/complete/junit-junit-4.13.1
+
+pool:
+  name: sonar-pool
+
+steps:
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'testing-sonar'
+    scannerMode: 'Other'
+    extraProperties: |
+      # Additional properties that will be passed to the scanner,
+      # Put one key=value per line, example:
+      # sonar.exclusions=**/*.bin
+      sonar.projectKey=testing-java_testing-java_643bf7bc-3b15-4487-b5cc-43b66029b66a
+      sonar.projectName=testing-java
+- task: Maven@4
+  inputs:
+    mavenPomFile: './complete/pom.xml'
+    goals: 'clean install package'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: true  # Enable SonarQube analysis
+- task: SonarQubePublish@5
+  inputs:
+    pollingTimeoutSec: '300'
