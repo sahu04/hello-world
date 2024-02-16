@@ -26,11 +26,16 @@ steps:
     goals: 'clean install package'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    codeCoverageToolOption: 'JaCoCo'
+    codeCoverageSourceDirectories: './complete/src'
+    codeCoverageRestoreOriginalPomXml: true
     javaHomeOption: 'JDKVersion'
     mavenVersionOption: 'Default'
     mavenAuthenticateFeed: false
     effectivePomSkip: false
-    sonarQubeRunAnalysis: true  # Enable SonarQube analysis
+    sonarQubeRunAnalysis: true
+    isJacocoCoverageReportXML: true
+    sqMavenPluginVersionChoice: 'pom'
 - task: SonarQubePublish@5
   inputs:
     pollingTimeoutSec: '300'
