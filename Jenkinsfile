@@ -45,7 +45,7 @@
 
 
 pipeline {
-    agent any
+    agent aws
 
     stages {
 
