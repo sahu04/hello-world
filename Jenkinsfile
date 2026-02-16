@@ -44,40 +44,79 @@
 // }
 
 
+// pipeline {
+//     agent any
+
+//     stages {
+
+//         stage('Checkout') {
+//             steps {
+//                 git branch: 'main', url: 'https://github.com/sahu04/hello-world.git'
+//             }
+//         }
+
+//         stage('Build with Maven') {
+//             steps {
+//                 sh 'mvn -f complete/pom.xml clean install'
+//             }
+//         }
+
+//         stage('Archive Artifacts') {
+//             steps {
+//                 archiveArtifacts artifacts: 'complete/target/*.jar', fingerprint: true
+//             }
+//         }
+
+//         stage('Run JAR') {
+//             steps {
+//                 sh 'java -jar complete/target/gs-maven-0.1.0.jar'
+//             }
+//         }
+//     }
+
+//     post {
+//         always {
+//             echo "Build Finished"
+//         }
+//     }
+// }
+
 pipeline {
     agent any
+
+    tools {
+        maven 'Maven'
+    }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/sahu04/hello-world.git'
+                git branch: 'main',
+                url: 'https://github.com/sahu04/hello-world.git'
             }
         }
 
-        stage('Build with Maven') {
+        stage('Build') {
             steps {
-                sh 'mvn -f complete/pom.xml clean install'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Archive Artifacts') {
+        stage('SonarQube Analysis') {
             steps {
-                archiveArtifacts artifacts: 'complete/target/*.jar', fingerprint: true
+                withSonarQubeEnv('sonar') {
+                    sh 'mvn sonar:sonar'
+                }
             }
         }
 
-        stage('Run JAR') {
+        stage('Quality Gate') {
             steps {
-                sh 'java -jar complete/target/gs-maven-0.1.0.jar'
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Build Finished"
         }
     }
 }
-
